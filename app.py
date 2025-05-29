@@ -15,7 +15,7 @@ months_days = [(m, d) for m in range(1, 13) for d in range(1, 32)
                if not (m == 2 and d > 29) and not (m in [4, 6, 9, 11] and d > 30)]
 
 # タイトル
-st.title("📅 日付順音声入力アプリ（修正機能付き）")
+st.title("📅 日付順音声入力アプリ（途中保存対応）")
 
 # 修正中の日付があれば、それを優先表示
 if st.session_state.edit_date:
@@ -29,16 +29,14 @@ else:
         st.markdown(f"### 現在入力中：**{current_date_str}**")
     else:
         current_date_str = None
-        st.success("🎉 すべての入力が完了しました！以下からExcelファイルをダウンロードできます。")
+        st.success("🎉 入力が完了しました！")
 
 # 入力欄の表示（入力中 or 修正中）
 if current_date_str:
-    # 修正モード中は既存の値、そうでなければ空欄（前の入力は記憶しない）
     if st.session_state.edit_date:
         default_val = st.session_state.data.get(current_date_str, "").replace(".", " ")
     else:
         default_val = ""
-
     user_input = st.text_input("🎙️ 数字をスペース区切りで入力してください（例：44 43 48）", value=default_val, key=current_date_str)
 
     if st.button("✅ 登録して次へ"):
@@ -54,12 +52,11 @@ if current_date_str:
 st.markdown("---")
 st.markdown("#### 📝 入力済み一覧")
 
-# 🔽 🔧 ここで日付順にソートして表示
 for date in sorted(
     st.session_state.data.keys(),
     key=lambda x: (
-        int(x.replace("月", ".").replace("日", "").split(".")[0]),  # 月
-        int(x.replace("月", ".").replace("日", "").split(".")[1])   # 日
+        int(x.replace("月", ".").replace("日", "").split(".")[0]),
+        int(x.replace("月", ".").replace("日", "").split(".")[1])
     )
 ):
     value = st.session_state.data[date]
@@ -68,9 +65,9 @@ for date in sorted(
     if cols[1].button("✏️ 修正", key=f"edit_{date}"):
         st.session_state.edit_date = date
         st.rerun()
-        
-# Excel出力（全入力完了 & 修正中でないとき）
-if st.session_state.date_index >= len(months_days) and not st.session_state.edit_date:
+
+# Excel出力（途中でも出力可能）
+if len(st.session_state.data) > 0:
     df_out = pd.DataFrame(index=range(1, 32), columns=[f"{m}月" for m in range(1, 13)])
     for date_str, value in st.session_state.data.items():
         m, d = map(int, date_str.replace("月", ".").replace("日", "").split("."))
@@ -83,8 +80,8 @@ if st.session_state.date_index >= len(months_days) and not st.session_state.edit
     output.seek(0)
 
     st.download_button(
-        label="📥 Excelファイルをダウンロード",
+        label="📥 Excelファイルをダウンロード（途中保存OK）",
         data=output,
-        file_name="gosei_1930.xlsx",
+        file_name="gosei_1930_partial.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
