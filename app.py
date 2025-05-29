@@ -53,13 +53,22 @@ if current_date_str:
 # 入力済み一覧と修正ボタン
 st.markdown("---")
 st.markdown("#### 📝 入力済み一覧")
-for date, value in sorted(st.session_state.data.items()):
+
+# 🔽 🔧 ここで日付順にソートして表示
+for date in sorted(
+    st.session_state.data.keys(),
+    key=lambda x: (
+        int(x.replace("月", ".").replace("日", "").split(".")[0]),  # 月
+        int(x.replace("月", ".").replace("日", "").split(".")[1])   # 日
+    )
+):
+    value = st.session_state.data[date]
     cols = st.columns([3, 1])
     cols[0].markdown(f"- {date}: {value}")
     if cols[1].button("✏️ 修正", key=f"edit_{date}"):
         st.session_state.edit_date = date
         st.rerun()
-
+        
 # Excel出力（全入力完了 & 修正中でないとき）
 if st.session_state.date_index >= len(months_days) and not st.session_state.edit_date:
     df_out = pd.DataFrame(index=range(1, 32), columns=[f"{m}月" for m in range(1, 13)])
