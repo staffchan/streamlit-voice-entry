@@ -15,12 +15,12 @@ months_days = [(m, d) for m in range(1, 13) for d in range(1, 32)
                if not (m == 2 and d > 29) and not (m in [4, 6, 9, 11] and d > 30)]
 
 # ─────────────────────
-# 📂 アップロードして再開するセクション（サイドバー）
+# サイドバーでファイルアップロード
 st.sidebar.header("📂 Excelファイルの読み込み")
 uploaded_file = st.sidebar.file_uploader("保存したExcelファイルをアップロード", type=["xlsx"])
 
-# 📂 ファイル読み込み処理（安全にネスト）
-if uploaded_file:
+# ファイルがあるときだけ読み込み処理を行う
+if uploaded_file is not None:
     df_uploaded = pd.read_excel(uploaded_file)
     new_data = {}
 
@@ -40,7 +40,7 @@ if uploaded_file:
 
     st.session_state.data = new_data
 
-    # 次に入力すべき場所へジャンプ
+    # 次の未入力日付を探す
     for i, (m, d) in enumerate(months_days):
         if f"{m}月{d}日" not in new_data:
             st.session_state.date_index = i
