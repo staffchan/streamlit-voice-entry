@@ -21,28 +21,28 @@ uploaded_file = st.sidebar.file_uploader("保存したExcelファイルをアッ
 
 if uploaded_file:
     df_uploaded = pd.read_excel(uploaded_file)
-new_data = {}
-day_column = df_uploaded.columns[0]
-for idx, row in df_uploaded.iterrows():
-    day = int(row[day_column])
-    for col in df_uploaded.columns:
-        if col.endswith("月") and col.replace("月", "").isdigit():
-            if pd.notna(row[col]):
-                date_key = f"{col}{day}日"
-                new_data[date_key] = str(row[col])
+    new_data = {}
+
+    day_column = df_uploaded.columns[0]  # ← ファイルが存在してから初めて使う！
+    for idx, row in df_uploaded.iterrows():
+        day = int(row[day_column])
+        for col in df_uploaded.columns:
+            if col.endswith("月") and col.replace("月", "").isdigit():
+                if pd.notna(row[col]):
+                    date_key = f"{col}{day}日"
+                    new_data[date_key] = str(row[col])
+
     st.session_state.data = new_data
 
-    # 次に入力すべき位置を探す
+    # 次に進む位置を決める
     for i, (m, d) in enumerate(months_days):
-        key = f"{m}月{d}日"
-        if key not in new_data:
+        if f"{m}月{d}日" not in new_data:
             st.session_state.date_index = i
             break
     else:
         st.session_state.date_index = len(months_days)
 
     st.sidebar.success("✅ データを読み込みました！")
-
 # ─────────────────────
 # メイン表示エリア
 st.title("📅 日付順音声入力アプリ（読み込み対応）")
