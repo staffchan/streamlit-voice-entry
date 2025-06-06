@@ -23,7 +23,8 @@ if uploaded_file:
     df_uploaded = pd.read_excel(uploaded_file)
     new_data = {}
     for idx, row in df_uploaded.iterrows():
-        day = int(row["日"])
+        day_column = df_uploaded.columns[0]
+        day = int(row[day_column])
         for month in range(1, 13):
             col = f"{month}月"
             if pd.notna(row[col]):
