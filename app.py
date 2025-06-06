@@ -20,21 +20,21 @@ st.sidebar.header("📂 Excelファイルの読み込み")
 uploaded_file = st.sidebar.file_uploader("保存したExcelファイルをアップロード", type=["xlsx"])
 
 if uploaded_file:
-    df_uploaded = pd.read_excel(uploaded_file)
+   df_uploaded = pd.read_excel(uploaded_file)
 new_data = {}
 day_column = df_uploaded.columns[0]
 
 for idx, row in df_uploaded.iterrows():
     day = int(row[day_column])
     for col in df_uploaded.columns:
-    if col is None or pd.isna(col):
-        continue  # 空の列名はスキップ！
+        if col is None or pd.isna(col):
+            continue  # ← これがなかった！
 
-    col_str = str(col)
-    if col_str.endswith("月") and col_str.replace("月", "").isdigit():
-        if pd.notna(row[col]):
-            date_key = f"{col_str}{day}日"
-            new_data[date_key] = str(row[col])
+        col_str = str(col)
+        if col_str.endswith("月") and col_str.replace("月", "").isdigit():
+            if pd.notna(row[col]):
+                date_key = f"{col_str}{day}日"
+                new_data[date_key] = str(row[col])
     st.session_state.data = new_data
 
     # 次に進む位置を決める
