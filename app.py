@@ -8,47 +8,71 @@ if 'date_index' not in st.session_state:
 if 'data' not in st.session_state:
     st.session_state.data = {}
 if 'edit_date' not in st.session_state:
-    st.session_state.edit_date = None  # 修正対象日付
+    st.session_state.edit_date = None
 
-# 有効な月日（1月1日〜12月31日まで）
+# 月日データの順序リスト（1月1日〜12月31日）
 months_days = [(m, d) for m in range(1, 13) for d in range(1, 32)
                if not (m == 2 and d > 29) and not (m in [4, 6, 9, 11] and d > 30)]
 
-# タイトル
-st.title("📅 日付順音声入力アプリ（途中保存対応）")
+# ─────────────────────
+# 📂 アップロードして再開するセクション（サイドバー）
+st.sidebar.header("📂 Excelファイルの読み込み")
+uploaded_file = st.sidebar.file_uploader("保存したExcelファイルをアップロード", type=["xlsx"])
 
-# 修正中の日付があれば、それを優先表示
+if uploaded_file:
+    df_uploaded = pd.read_excel(uploaded_file)
+    new_data = {}
+    for idx, row in df_uploaded.iterrows():
+        day = int(row["日"])
+        for month in range(1, 13):
+            col = f"{month}月"
+            if pd.notna(row[col]):
+                new_data[f"{month}月{day}日"] = str(row[col])
+    st.session_state.data = new_data
+
+    # 次に入力すべき位置を探す
+    for i, (m, d) in enumerate(months_days):
+        key = f"{m}月{d}日"
+        if key not in new_data:
+            st.session_state.date_index = i
+            break
+    else:
+        st.session_state.date_index = len(months_days)
+
+    st.sidebar.success("✅ データを読み込みました！")
+
+# ─────────────────────
+# メイン表示エリア
+st.title("📅 日付順音声入力アプリ（読み込み対応）")
+
+# 現在の入力対象日付
 if st.session_state.edit_date:
     current_date_str = st.session_state.edit_date
     current_month, current_day = map(int, current_date_str.replace("月", ".").replace("日", "").split("."))
     st.markdown(f"### 🔁 修正中：**{current_date_str}**")
+elif st.session_state.date_index < len(months_days):
+    current_month, current_day = months_days[st.session_state.date_index]
+    current_date_str = f"{current_month}月{current_day}日"
+    st.markdown(f"### 現在入力中：**{current_date_str}**")
 else:
-    if st.session_state.date_index < len(months_days):
-        current_month, current_day = months_days[st.session_state.date_index]
-        current_date_str = f"{current_month}月{current_day}日"
-        st.markdown(f"### 現在入力中：**{current_date_str}**")
-    else:
-        current_date_str = None
-        st.success("🎉 入力が完了しました！")
+    current_date_str = None
+    st.success("🎉 入力が完了しました！")
 
-# 入力欄の表示（入力中 or 修正中）
+# ─────────────────────
+# 入力欄
 if current_date_str:
-    if st.session_state.edit_date:
-        default_val = st.session_state.data.get(current_date_str, "").replace(".", " ")
-    else:
-        default_val = ""
+    default_val = st.session_state.data.get(current_date_str, "").replace(".", " ") if st.session_state.edit_date else ""
     user_input = st.text_input("🎙️ 数字をスペース区切りで入力してください（例：44 43 48）", value=default_val, key=current_date_str)
 
     if st.button("✅ 登録して次へ"):
         if user_input.strip() != "":
             st.session_state.data[current_date_str] = user_input.strip().replace(" ", ".")
-            if st.session_state.edit_date:
-                st.session_state.edit_date = None
-            else:
-                st.session_state.date_index += 1
+            st.session_state.edit_date = None
+            st.session_state.date_index += 1
             st.rerun()
 
-# 入力済み一覧と修正ボタン
+# ─────────────────────
+# 入力済み一覧 + 修正ボタン
 st.markdown("---")
 st.markdown("#### 📝 入力済み一覧")
 
@@ -66,7 +90,8 @@ for date in sorted(
         st.session_state.edit_date = date
         st.rerun()
 
-# Excel出力（途中でも出力可能）
+# ─────────────────────
+# Excel出力（途中でもOK）
 if len(st.session_state.data) > 0:
     df_out = pd.DataFrame(index=range(1, 32), columns=[f"{m}月" for m in range(1, 13)])
     for date_str, value in st.session_state.data.items():
