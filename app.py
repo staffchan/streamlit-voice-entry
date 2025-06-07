@@ -19,11 +19,13 @@ if uploaded_file:
     st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、現在の命数を確認・必要な箇所のみ修正してください")
 
     months = df.columns[1:]
+    days = df["日"].tolist()
 
-    for day in range(1, 32):  # ← ここが大事！！
+    for day in days:
         for month in months:
             label = f"{month}{day}日"
             key_base = f"{month}_{day}"
+
             try:
                 cell_value = df.loc[df["日"] == day, month].values[0]
                 current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
