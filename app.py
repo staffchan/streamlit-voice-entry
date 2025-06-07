@@ -20,8 +20,8 @@ if uploaded_file:
     months = df.columns        
     days = df.index.tolist()   
 
-    for day in df.index:
-        for month in df.columns:
+    for month in df.columns:
+        for day in df.index:
             try:
                 cell_value = df.at[day, month]
                 current_value = str(cell_value)
