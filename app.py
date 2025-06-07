@@ -7,44 +7,37 @@ st.title("📋 命数チェック＆修正アプリ（1〜31日 × 1〜12月対�
 uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアップロードしてください", type=["xlsx"])
 
 if uploaded_file:
-    df = pd.read_excel(uploaded_file)
-    df.columns.values[0] = "日"  # 1列目を「日」に固定
-    st.success("✅ データを読み込みました！")
+df = pd.read_excel(uploaded_file)
+df.columns.values[0] = "日"  # 1列目の列名を「日」に
+df = df.set_index("日")     # ← ここが超重要！！！
 
-    if "fix_data" not in st.session_state:
-        st.session_state.fix_data = {}
-    if "status_data" not in st.session_state:
-        st.session_state.status_data = {}
+months = df.columns        # ← 1月〜12月
+days = df.index.tolist()   # ← インデックス（日）
 
-    st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、現在の命数を確認・必要な箇所のみ修正してください")
+for day in days:
+    for month in months:
+        try:
+            cell_value = df.at[day, month]
+            current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
+        except:
+            current_value = "（取得エラー）"
 
-    months = df.columns[1:]          # 「1月」「2月」などの列名
-    days = list(range(1, 32))        # 日付は1〜31を固定で回す
+        label = f"{month}{day}日"
+        key_base = f"{month}_{day}"
 
-    for day in days:
-        for month in months:
-            try:
-                cell_value = df.loc[df["日"] == day, month].values[0]
-                current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
-            except:
-                current_value = "（取得エラー）"
+        st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
+        status = st.radio(
+            f"選択：{label}",
+            ["OK", "修正"],
+            key=f"radio_{key_base}",
+            horizontal=True
+        )
+        st.session_state.status_data[label] = status
 
-            label = f"{month}{day}日"
-            key_base = f"{month}_{day}"
-
-            st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
-            status = st.radio(
-                f"選択：{label}",
-                ["OK", "修正"],
-                key=f"radio_{key_base}",
-                horizontal=True
-            )
-            st.session_state.status_data[label] = status
-
-            if status == "修正":
-                user_input = st.text_input(f"✏️ 新しい命数を入力（{label}）", key=f"input_{key_base}")
-                if user_input:
-                    st.session_state.fix_data[label] = user_input
+        if status == "修正":
+            user_input = st.text_input(f"✏️ 新しい命数を入力（{label}）", key=f"input_{key_base}")
+            if user_input:
+                st.session_state.fix_data[label] = user_input
                     
     if st.button("💾 修正を反映してExcelをダウンロード"):
         for label, val in st.session_state.fix_data.items():
