@@ -20,20 +20,20 @@ if uploaded_file:
     st.markdown("### ✏️ 修正したいセルを選んで入力してください")
 
     for day in df["日"]:
-    cols = st.columns(len(df.columns) - 1)
-    for col_idx, month in enumerate(df.columns[1:], start=1):
-        cell_value = df.loc[df["日"] == day, month].values[0]
-        label = f"{month}{day}日"
+        cols = st.columns(len(df.columns) - 1)
+        for col_idx, month in enumerate(df.columns[1:], start=1):
+            cell_value = df.loc[df["日"] == day, month].values[0]
+            label = f"{month}{day}日"
 
-        with cols[col_idx - 1]:
-            if pd.notna(cell_value) and str(cell_value).strip() != "":
-                st.markdown(f"✔️ {label}")
-                st.markdown(f"{cell_value}")
-            else:
-                st.markdown(f"❌ {label}")
-                user_input = st.text_input(f"修正（{label}）", key=f"{label}_input")
-                if user_input:
-                    st.session_state.fix_data[label] = user_input
+            with cols[col_idx - 1]:
+               if pd.notna(cell_value) and str(cell_value).strip() != "":
+                   st.markdown(f"✔️ {label}")
+                   st.markdown(f"{cell_value}")
+               else:
+                   st.markdown(f"❌ {label}")
+                   user_input = st.text_input(f"修正（{label}）", key=f"{label}_input")
+                   if user_input:
+                        st.session_state.fix_data[label] = user_input
 
     # 保存処理
     if st.button("💾 修正を反映してExcelをダウンロード"):
