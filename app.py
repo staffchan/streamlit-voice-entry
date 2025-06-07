@@ -18,10 +18,9 @@ if uploaded_file:
 
     st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、現在の命数を確認・必要な箇所のみ修正してください")
 
-    days = list(df["日"])
     months = df.columns[1:]
 
-    for day in days:
+    for day in range(1, 32):  # ← ここが大事！！
         for month in months:
             label = f"{month}{day}日"
             key_base = f"{month}_{day}"
