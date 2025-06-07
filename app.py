@@ -2,119 +2,60 @@ import streamlit as st
 import pandas as pd
 import io
 
-# セッションステートの初期化
-if 'date_index' not in st.session_state:
-    st.session_state.date_index = 0
-if 'data' not in st.session_state:
-    st.session_state.data = {}
-if 'edit_date' not in st.session_state:
-    st.session_state.edit_date = None
+st.title("📋 命数チェック＆音声修正システム")
 
-# 月日データの順序リスト（1月1日〜12月31日）
-months_days = [(m, d) for m in range(1, 13) for d in range(1, 32)
-               if not (m == 2 and d > 29) and not (m in [4, 6, 9, 11] and d > 30)]
+# Excelファイルアップロード
+uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアップロードしてください", type=["xlsx"])
 
-# ─────────────────────
-# サイドバーでファイルアップロード
-st.sidebar.header("📂 Excelファイルの読み込み")
-uploaded_file = st.sidebar.file_uploader("保存したExcelファイルをアップロード", type=["xlsx"])
+if uploaded_file:
+    df = pd.read_excel(uploaded_file)
+    df_display = df.copy()
 
-# ファイルがあるときだけ読み込み処理を行う
-if uploaded_file is not None:
-    df_uploaded = pd.read_excel(uploaded_file)
-    new_data = {}
+    st.success("✅ ファイルを読み込みました！")
 
-    day_column = df_uploaded.columns[0]
+    # セッション状態で修正用データを保持
+    if "fix_data" not in st.session_state:
+        st.session_state.fix_data = {}
 
-    for idx, row in df_uploaded.iterrows():
-        day = int(row[day_column])
-        for col in df_uploaded.columns:
-            if col is None or pd.isna(col):
-                continue
+    st.markdown("### ✏️ 修正したいセルを選んで入力してください")
 
-            col_str = str(col)
-            if col_str.endswith("月") and col_str.replace("月", "").isdigit():
-                if pd.notna(row[col]):
-                    date_key = f"{col_str}{day}日"
-                    new_data[date_key] = str(row[col])
+    for row_idx in range(len(df)):
+        day = df.iloc[row_idx, 0]  # 一番左の列が「日」
+        cols = st.columns(len(df.columns) - 1)
+        for col_idx, col in enumerate(df.columns[1:], start=1):  # 月ごとの列
+            cell_value = df.iloc[row_idx, col_idx]
+            label = f"{col}{day}日"
 
-    st.session_state.data = new_data
+            with cols[col_idx - 1]:
+                if pd.notna(cell_value):
+                    st.markdown(f"✔️ {label}")
+                    st.markdown(f"{cell_value}")
+                else:
+                    st.markdown(f"❌ {label}")
+                    user_input = st.text_input(f"修正（{label}）", key=f"{label}_input")
+                    if user_input:
+                        st.session_state.fix_data[label] = user_input
 
-    # 次の未入力日付を探す
-    for i, (m, d) in enumerate(months_days):
-        if f"{m}月{d}日" not in new_data:
-            st.session_state.date_index = i
-            break
-    else:
-        st.session_state.date_index = len(months_days)
+    # 保存処理
+    if st.button("💾 修正を反映してExcelをダウンロード"):
+        for label, val in st.session_state.fix_data.items():
+            # "1月3日" → 月, 日に分解
+            try:
+                month, day = label.replace("日", "").split("月")
+                month_col = f"{month}月"
+                day = int(day)
+                df.loc[df["日"] == day, month_col] = val
+            except Exception as e:
+                st.warning(f"❗ エラーが発生しました: {e}")
 
-    st.sidebar.success("✅ データを読み込みました！")
-# ─────────────────────
-# メイン表示エリア
-st.title("📅 日付順音声入力アプリ（読み込み対応）")
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name="1930年")
+        output.seek(0)
 
-# 現在の入力対象日付
-if st.session_state.edit_date:
-    current_date_str = st.session_state.edit_date
-    current_month, current_day = map(int, current_date_str.replace("月", ".").replace("日", "").split("."))
-    st.markdown(f"### 🔁 修正中：**{current_date_str}**")
-elif st.session_state.date_index < len(months_days):
-    current_month, current_day = months_days[st.session_state.date_index]
-    current_date_str = f"{current_month}月{current_day}日"
-    st.markdown(f"### 現在入力中：**{current_date_str}**")
-else:
-    current_date_str = None
-    st.success("🎉 入力が完了しました！")
-
-# ─────────────────────
-# 入力欄
-if current_date_str:
-    default_val = st.session_state.data.get(current_date_str, "").replace(".", " ") if st.session_state.edit_date else ""
-    user_input = st.text_input("🎙️ 数字をスペース区切りで入力してください（例：44 43 48）", value=default_val, key=current_date_str)
-
-    if st.button("✅ 登録して次へ"):
-        if user_input.strip() != "":
-            st.session_state.data[current_date_str] = user_input.strip().replace(" ", ".")
-            st.session_state.edit_date = None
-            st.session_state.date_index += 1
-            st.rerun()
-
-# ─────────────────────
-# 入力済み一覧 + 修正ボタン
-st.markdown("---")
-st.markdown("#### 📝 入力済み一覧")
-
-for date in sorted(
-    st.session_state.data.keys(),
-    key=lambda x: (
-        int(x.replace("月", ".").replace("日", "").split(".")[0]),
-        int(x.replace("月", ".").replace("日", "").split(".")[1])
-    )
-):
-    value = st.session_state.data[date]
-    cols = st.columns([3, 1])
-    cols[0].markdown(f"- {date}: {value}")
-    if cols[1].button("✏️ 修正", key=f"edit_{date}"):
-        st.session_state.edit_date = date
-        st.rerun()
-
-# ─────────────────────
-# Excel出力（途中でもOK）
-if len(st.session_state.data) > 0:
-    df_out = pd.DataFrame(index=range(1, 32), columns=[f"{m}月" for m in range(1, 13)])
-    for date_str, value in st.session_state.data.items():
-        m, d = map(int, date_str.replace("月", ".").replace("日", "").split("."))
-        df_out.at[d, f"{m}月"] = value
-    df_out.insert(0, "日", df_out.index)
-
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df_out.to_excel(writer, index=False, sheet_name="1930年")
-    output.seek(0)
-
-    st.download_button(
-        label="📥 Excelファイルをダウンロード（途中保存OK）",
-        data=output,
-        file_name="gosei_1930_partial.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+        st.download_button(
+            label="📥 修正済みExcelをダウンロード",
+            data=output,
+            file_name="1930_fixed.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
