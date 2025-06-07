@@ -9,7 +9,8 @@ uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアッ
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-    df_display = df.copy()
+    st.write("✅ 読み込んだデータの中身：")
+    st.write(df.head())  # ← これを追加
 
     st.success("✅ ファイルを読み込みました！")
 
