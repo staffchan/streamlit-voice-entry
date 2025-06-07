@@ -2,40 +2,48 @@ import streamlit as st
 import pandas as pd
 import io
 
-st.title("📋 命数チェック＆音声修正システム")
+st.title("📋 命数チェック＆修正アプリ（全日対応）")
 
-# Excelファイルアップロード
 uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアップロードしてください", type=["xlsx"])
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-    df_display = df.copy()
+    df.columns.values[0] = "日"  # 1列目を「日」に補正
+    st.success("✅ データを読み込みました！")
 
-    st.success("✅ ファイルを読み込みました！")
-
-    # セッション状態で修正用データを保持
+    # 修正入力保持用のセッションステート初期化
     if "fix_data" not in st.session_state:
         st.session_state.fix_data = {}
 
-    st.markdown("### ✏️ 修正したいセルを選んで入力してください")
+    if "status_data" not in st.session_state:
+        st.session_state.status_data = {}
 
+    st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、必要な箇所のみ修正してください")
+
+    # 表の構造：縦が日（1〜31）、横が「1月」〜「12月」
     for day in df["日"]:
         cols = st.columns(len(df.columns) - 1)
         for col_idx, month in enumerate(df.columns[1:], start=1):
             cell_value = df.loc[df["日"] == day, month].values[0]
             label = f"{month}{day}日"
+            key_status = f"status_{label}"
+            key_input = f"input_{label}"
 
             with cols[col_idx - 1]:
-               if pd.notna(cell_value) and str(cell_value).strip() != "":
-                   st.markdown(f"✔️ {label}")
-                   st.markdown(f"{cell_value}")
-               else:
-                   st.markdown(f"❌ {label}")
-                   user_input = st.text_input(f"修正（{label}）", key=f"{label}_input")
-                   if user_input:
+                status = st.radio(
+                    f"{label}",
+                    ["OK", "修正"],
+                    key=key_status,
+                    horizontal=True,
+                )
+                st.session_state.status_data[label] = status
+
+                if status == "修正":
+                    user_input = st.text_input(f"入力（{label}）", key=key_input)
+                    if user_input:
                         st.session_state.fix_data[label] = user_input
 
-    # 保存処理
+    # 保存ボタン処理
     if st.button("💾 修正を反映してExcelをダウンロード"):
         for label, val in st.session_state.fix_data.items():
             try:
@@ -44,7 +52,7 @@ if uploaded_file:
                 day = int(day)
                 df.loc[df["日"] == day, month_col] = val
             except Exception as e:
-                st.warning(f"❗ エラーが発生しました: {e}")
+                st.warning(f"❗ エラー（{label}）：{e}")
 
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
