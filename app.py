@@ -18,8 +18,8 @@ if uploaded_file:
 
     st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、現在の命数を確認・必要な箇所のみ修正してください")
 
-    months = df.columns[1:]              # 横方向の「1月」「2月」など
-    days = df["日"].tolist()             # 縦方向の「1」「2」…「31」
+    months = df.columns[1:]          # 「1月」「2月」などの列名
+    days = list(range(1, 32))        # 日付は1〜31を固定で回す
 
     for day in days:
         for month in months:
