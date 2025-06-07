@@ -9,8 +9,7 @@ uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアッ
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-    st.write("✅ 読み込んだデータの中身：")
-    st.write(df.head())  # ← これを追加
+    df_display = df.copy()
 
     st.success("✅ ファイルを読み込みました！")
 
@@ -21,14 +20,14 @@ if uploaded_file:
     st.markdown("### ✏️ 修正したいセルを選んで入力してください")
 
     for row_idx in range(len(df)):
-        day = df.iloc[row_idx, 0]  # 一番左の列が「日」
+        day = df.iloc[row_idx, 0]  # 最初の列（日）
         cols = st.columns(len(df.columns) - 1)
-        for col_idx, col in enumerate(df.columns[1:], start=1):  # 月ごとの列
+        for col_idx, col in enumerate(df.columns[1:], start=1):
             cell_value = df.iloc[row_idx, col_idx]
             label = f"{col}{day}日"
 
             with cols[col_idx - 1]:
-                if pd.notna(cell_value):
+                if pd.notna(cell_value) and str(cell_value).strip() != "":
                     st.markdown(f"✔️ {label}")
                     st.markdown(f"{cell_value}")
                 else:
@@ -40,7 +39,6 @@ if uploaded_file:
     # 保存処理
     if st.button("💾 修正を反映してExcelをダウンロード"):
         for label, val in st.session_state.fix_data.items():
-            # "1月3日" → 月, 日に分解
             try:
                 month, day = label.replace("日", "").split("月")
                 month_col = f"{month}月"
