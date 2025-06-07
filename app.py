@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 import io
 
-st.title("📋 命数チェック＆修正アプリ（全日対応）")
+st.title("📋 命数チェック＆修正アプリ（1〜31日 × 1〜12月対応）")
 
 uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアップロードしてください", type=["xlsx"])
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-    df.columns.values[0] = "日"  # 1列目を「日」に補正
+    df.columns.values[0] = "日"  # 1列目を「日」に固定
     st.success("✅ データを読み込みました！")
 
     if "fix_data" not in st.session_state:
@@ -18,16 +18,18 @@ if uploaded_file:
 
     st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、現在の命数を確認・必要な箇所のみ修正してください")
 
-    for day in df["日"]:
-        for month in df.columns[1:]:
-            try:
-                cell_value = df.loc[df["日"] == day, month].values[0]
-            except:
-                cell_value = ""
+    days = list(df["日"])
+    months = df.columns[1:]
 
+    for day in days:
+        for month in months:
             label = f"{month}{day}日"
             key_base = f"{month}_{day}"
-            current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
+            try:
+                cell_value = df.loc[df["日"] == day, month].values[0]
+                current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
+            except:
+                current_value = "（取得エラー）"
 
             st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
             status = st.radio(
