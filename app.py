@@ -8,8 +8,8 @@ uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアッ
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-    df.columns.values[0] = "日"  # 1列目の列名を「日」に
-    df = df.set_index("日")     # ← ここが超重要！！！
+    df.columns.values[0] = "日"  # 先に列名を「日」に変える
+    df = df.set_index("日")     # そのあと index に設定！！
     
     if "status_data" not in st.session_state:
         st.session_state.status_data = {}
