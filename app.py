@@ -17,18 +17,18 @@ if uploaded_file:
     if "fix_data" not in st.session_state:
         st.session_state.fix_data = {}
 
-    months = df.columns        # ← 1月〜12月
-    days = df.index.tolist()   # ← インデックス（日）
+    months = df.columns        
+    days = df.index.tolist()   
 
-    for day in days:
-        for month in months:
+    for day in df.index:
+        for month in df.columns:
             try:
                 cell_value = df.at[day, month]
-                current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
+                current_value = str(cell_value)
             except:
-                current_value = "（取得エラー）"
+                current_value = "(取得エラー)"
 
-            label = f"{month}{day}日"
+            label = f"{month}月{day}日"
             key_base = f"{month}_{day}"
 
             st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
