@@ -58,4 +58,3 @@ if uploaded_file:
             file_name="1930_fixed.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        st.markdown("🧪 **これは新しい修正済みバージョンです！**")
