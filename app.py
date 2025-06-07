@@ -10,6 +10,12 @@ if uploaded_file:
     df = pd.read_excel(uploaded_file)
     df.columns.values[0] = "日"  # 1列目の列名を「日」に
     df = df.set_index("日")     # ← ここが超重要！！！
+    
+    if "status_data" not in st.session_state:
+    st.session_state.status_data = {}
+    
+    if "fix_data" not in st.session_state:
+    st.session_state.fix_data = {}
 
     months = df.columns        # ← 1月〜12月
     days = df.index.tolist()   # ← インデックス（日）
