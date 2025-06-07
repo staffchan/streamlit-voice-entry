@@ -18,19 +18,19 @@ if uploaded_file:
 
     st.markdown("### ✏️ 各セルについて『OK or 修正』を選んで、現在の命数を確認・必要な箇所のみ修正してください")
 
-    months = df.columns[1:]
-    days = df["日"].tolist()
+    months = df.columns[1:]              # 横方向の「1月」「2月」など
+    days = df["日"].tolist()             # 縦方向の「1」「2」…「31」
 
     for day in days:
         for month in months:
-            label = f"{month}{day}日"
-            key_base = f"{month}_{day}"
-
             try:
                 cell_value = df.loc[df["日"] == day, month].values[0]
                 current_value = str(cell_value) if pd.notna(cell_value) and str(cell_value).strip() != "" else "（空）"
             except:
                 current_value = "（取得エラー）"
+
+            label = f"{month}{day}日"
+            key_base = f"{month}_{day}"
 
             st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
             status = st.radio(
@@ -45,7 +45,7 @@ if uploaded_file:
                 user_input = st.text_input(f"✏️ 新しい命数を入力（{label}）", key=f"input_{key_base}")
                 if user_input:
                     st.session_state.fix_data[label] = user_input
-
+                    
     if st.button("💾 修正を反映してExcelをダウンロード"):
         for label, val in st.session_state.fix_data.items():
             try:
