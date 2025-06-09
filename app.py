@@ -17,11 +17,11 @@ if uploaded_file:
     if "fix_data" not in st.session_state:
         st.session_state.fix_data = {}
 
-    months = df.columns        
-    days = df.index.tolist()   
+    months = sorted(df.columns, key=lambda x: int(x.replace("月", "")))  # 月：1月〜12月
+    days = sorted(df.index.tolist())  # 日：1〜31
 
-    for day in df.index: 
-        for month in df.columns:
+    for day in days:
+        for month in months:
             try:
                 cell_value = df.at[day, month]
                 current_value = str(cell_value)
