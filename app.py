@@ -51,10 +51,10 @@ if uploaded_file:
                 month, day = label.replace("日", "").split("月")
                 month_col = f"{month}月"
                 day = int(day)
-                df.loc[df["日"] == day, month_col] = val
+                df.at[day, month_col] = val
             except Exception as e:
                 st.warning(f"❗ エラー（{label}）：{e}")
-
+            
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df.to_excel(writer, index=False, sheet_name="1930年")
