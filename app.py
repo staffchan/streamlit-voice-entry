@@ -20,8 +20,8 @@ if uploaded_file:
     months = sorted(df.columns, key=lambda x: int(x.replace("月", "")))  # 月（1〜12）
     days = sorted(df.index.tolist())  # 日（1〜31）
 
-    for day in days:
-        for month in months:
+    for month in months:
+        for day in days:
             try:
                 cell_value = df.at[day, month]
                 current_value = str(cell_value)
