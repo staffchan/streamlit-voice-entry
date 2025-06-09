@@ -46,11 +46,10 @@ if uploaded_file:
                     st.session_state.fix_data[label] = user_input
                     
     if st.button("💾 修正を反映してExcelをダウンロード"):
-
         import os
-            original_filename = uploaded_file.name
-            base_name = os.path.splitext(original_filename)[0]
-            output_name = f"{base_name}_fixed.xlsx"
+        original_filename = uploaded_file.name
+        base_name = os.path.splitext(original_filename)[0]
+        output_name = f"{base_name}_fixed.xlsx"
         
         for label, val in st.session_state.fix_data.items():
             try:
