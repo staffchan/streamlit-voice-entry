@@ -20,7 +20,7 @@ if uploaded_file:
     months = df.columns        
     days = df.index.tolist()   
 
-    for day in df.index:
+    for day in df.index: 
         for month in df.columns:
             try:
                 cell_value = df.at[day, month]
@@ -28,7 +28,7 @@ if uploaded_file:
             except:
                 current_value = "(取得エラー)"
 
-            month_num = month.replace("月", "")  # ←ここ追加！
+            month_num = month.replace("月", "")
             label = f"{month_num}月{day}日"
             key_base = f"{month_num}_{day}"
 
