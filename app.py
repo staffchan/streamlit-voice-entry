@@ -20,16 +20,17 @@ if uploaded_file:
     months = df.columns        
     days = df.index.tolist()   
 
-    for month in df.columns:
-        for day in df.index:
+    for day in df.index:
+        for month in df.columns:
             try:
                 cell_value = df.at[day, month]
                 current_value = str(cell_value)
             except:
                 current_value = "(取得エラー)"
 
-            label = f"{month}月{day}日"
-            key_base = f"{month}_{day}"
+            month_num = month.replace("月", "")  # ←ここ追加！
+            label = f"{month_num}月{day}日"
+            key_base = f"{month_num}_{day}"
 
             st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
             status = st.radio(
