@@ -46,6 +46,12 @@ if uploaded_file:
                     st.session_state.fix_data[label] = user_input
                     
     if st.button("💾 修正を反映してExcelをダウンロード"):
+
+        import os
+            original_filename = uploaded_file.name
+            base_name = os.path.splitext(original_filename)[0]
+            output_name = f"{base_name}_fixed.xlsx"
+        
         for label, val in st.session_state.fix_data.items():
             try:
                 month, day = label.replace("日", "").split("月")
@@ -63,6 +69,6 @@ if uploaded_file:
         st.download_button(
             label="📥 修正済みExcelをダウンロード",
             data=output,
-            file_name="1930_fixed.xlsx",
+            file_name=output_name,  # ← ここが変更ポイント！
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
