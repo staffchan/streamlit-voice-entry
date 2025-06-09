@@ -17,8 +17,8 @@ if uploaded_file:
     if "fix_data" not in st.session_state:
         st.session_state.fix_data = {}
 
-    months = sorted(df.columns, key=lambda x: int(x.replace("月", "")))  # 月：1月〜12月
-    days = sorted(df.index.tolist())  # 日：1〜31
+    months = sorted(df.columns, key=lambda x: int(x.replace("月", "")))  # 月（1〜12）
+    days = sorted(df.index.tolist())  # 日（1〜31）
 
     for day in days:
         for month in months:
@@ -28,9 +28,8 @@ if uploaded_file:
             except:
                 current_value = "(取得エラー)"
 
-            month_num = month.replace("月", "")
-            label = f"{month_num}月{day}日"
-            key_base = f"{month_num}_{day}"
+            label = f"{month}{day}日"
+            key_base = f"{month}_{day}"
 
             st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
             status = st.radio(
