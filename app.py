@@ -7,8 +7,8 @@ st.title("📋 命数チェック＆修正アプリ（1〜31日 × 1〜12月対�
 uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアップロードしてください", type=["xlsx"])
 
 if uploaded_file:
-    st.write("📌 読み込んだ列名一覧:", df.columns.tolist())
     df = pd.read_excel(uploaded_file)
+    st.write("📌 読み込んだ列名一覧:", df.columns.tolist())
 
     # 1列目の結合列「日月」を「日」に置き換える処理
     df.rename(columns={df.columns[0]: "日月"}, inplace=True)
