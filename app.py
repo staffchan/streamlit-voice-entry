@@ -32,10 +32,10 @@ if uploaded_file:
             except:
                 current_value = "(取得エラー)"
 
-                label = f"{month}月{day}日"
-                key_base = f"{month}_{day}"
+            label = f"{month}月{day}日"
+            key_base = f"{month}_{day}"
 
-            st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
+            st.write(f"**{label}** 現在の命数：`{current_value}`")
             status = st.radio(
                 f"選択：{label}",
                 ["OK", "修正"],
