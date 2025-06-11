@@ -9,10 +9,7 @@ uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアッ
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
 
-    # 1列目の結合列「日月」を「日」に置き換える処理
-    df.rename(columns={df.columns[0]: "日月"}, inplace=True)
-    df["日"] = df["日月"]
-    df.drop(columns=["日月"], inplace=True)
+    df.rename(columns={df.columns[0]: "日"}, inplace=True)
     df = df.set_index("日")
 
     if "status_data" not in st.session_state:
