@@ -74,3 +74,5 @@ if uploaded_file:
             file_name=output_name,  # ← ここが変更ポイント！
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+        st.write(df.head())  # データフレームの先頭を表示
+        st.write("インデックス:", df.index.tolist())
