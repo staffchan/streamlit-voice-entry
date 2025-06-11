@@ -8,6 +8,7 @@ uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアッ
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
+    st.write(df)  # ← ここを追加！
     df.columns.values[0] = "日"  # 固定ではなく
     df.rename(columns={df.columns[0]: "日"}, inplace=True)  # 実際の1列目名を「日」に置換
     df = df.set_index("日")     # そのあと index に設定！！
