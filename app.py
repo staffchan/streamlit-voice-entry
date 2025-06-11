@@ -21,8 +21,8 @@ if uploaded_file:
     [col for col in df.columns if isinstance(col, str) and col.endswith("月")],
     key=lambda x: int(x.replace("月", ""))
     )
-    days = sorted(df.index.tolist())  # 日（1〜31）
-
+    days = sorted([int(day) for day in df.index.tolist()])
+    
     for month in months:
         for day in days:
             try:
