@@ -15,9 +15,6 @@ if uploaded_file:
     df.drop(columns=["日月"], inplace=True)
     df = df.set_index("日")
 
-    st.write("修正後のデータ：")
-    st.write(df)
-    
     if "status_data" not in st.session_state:
         st.session_state.status_data = {}
     
