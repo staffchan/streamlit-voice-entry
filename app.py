@@ -32,8 +32,8 @@ if uploaded_file:
             except:
                 current_value = "(取得エラー)"
 
-            label = f"{month}{day}日"
-            key_base = f"{month}_{day}"
+                label = f"{month}月{day}日"
+                key_base = f"{month}_{day}"
 
             st.write(f"📅 **{label}**　🧮 現在の命数：`{current_value}`")
             status = st.radio(
@@ -58,7 +58,7 @@ if uploaded_file:
         for label, val in st.session_state.fix_data.items():
             try:
                 month, day = label.replace("日", "").split("月")
-                month_col = f"{month}月"
+                month_col = str(month)
                 day = int(day)
                 df.at[day, month_col] = val
             except Exception as e:
