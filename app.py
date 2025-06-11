@@ -26,8 +26,8 @@ if uploaded_file:
         st.session_state.fix_data = {}
 
     months = sorted(
-    [col for col in df.columns if isinstance(col, str) and col.endswith("月")],
-    key=lambda x: int(x.replace("月", ""))
+    [col for col in df.columns if col != "日月"],
+    key=lambda x: int(x)
     )
     days = sorted([int(day) for day in df.index.tolist()])
     
