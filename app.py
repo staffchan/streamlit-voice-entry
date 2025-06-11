@@ -17,7 +17,10 @@ if uploaded_file:
     if "fix_data" not in st.session_state:
         st.session_state.fix_data = {}
 
-    months = sorted(df.columns, key=lambda x: int(x.replace("月", "")))  # 月（1〜12）
+    months = sorted(
+    [col for col in df.columns if isinstance(col, str) and col.endswith("月")],
+    key=lambda x: int(x.replace("月", ""))
+    )
     days = sorted(df.index.tolist())  # 日（1〜31）
 
     for month in months:
