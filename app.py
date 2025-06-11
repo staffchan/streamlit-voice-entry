@@ -8,7 +8,6 @@ uploaded_file = st.file_uploader("📂 命数入りのExcelファイルをアッ
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
-    st.write("📌 読み込んだ列名一覧:", df.columns.tolist())
 
     # 1列目の結合列「日月」を「日」に置き換える処理
     df.rename(columns={df.columns[0]: "日月"}, inplace=True)
