@@ -19,7 +19,7 @@ if uploaded_file:
         st.session_state.fix_data = {}
 
     months = sorted(
-    [col for col in df.columns if col != "日月"],
+    [col for col in df.columns if col != "日"],
     key=lambda x: int(x)
     )
     days = sorted([int(day) for day in df.index.tolist()])
